@@ -18,11 +18,8 @@ func main() {
 	//cetak informasi web server berjalan di localhost
 	fmt.Println("Server berjalan di http://localhost:8080")
 
-	// Menjalankan server localhost di port 8080
-	err := http.ListenAndServe(":8080", nil)
-
-	//lakukan erro handling jika server tidak jalan berikan pesan
-	if err != nil {
+	err := http.ListenAndServe(":8080", nil) // Menjalankan server localhost di port 8080
+	if err != nil {                          //lakukan erro handling jika server tidak jalan berikan pesan
 		fmt.Println(err)
 	}
 }

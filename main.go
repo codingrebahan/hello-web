@@ -17,11 +17,21 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "hello", name)
 }
 
+func aboutHandler(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Fprintln(w, "Ini adalah halaman About")
+}
+
+func rootHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Selamat Datang !")
+}
+
 // buat fungsi main
 func main() {
 
-	//regist helloHandler ke path "/" handlerfunc
-	http.HandleFunc("/hello", helloHandler)
+	http.HandleFunc("/", rootHandler)       //register welcomeHandler ke root path "/"
+	http.HandleFunc("/hello", helloHandler) //register helloHandler ke path "/hello" handlerfunc
+	http.HandleFunc("/about", aboutHandler) //register abouthandler ke path "/about" handlerfunc
 
 	//cetak informasi web server berjalan di localhost
 	fmt.Println("Server berjalan di http://localhost:8080")

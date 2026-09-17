@@ -6,7 +6,6 @@ import (
 	"net/http"
 )
 
-// buat handlernya untuk mencetak hellow world
 func helloHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
@@ -23,13 +22,12 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
 
 		if err != nil {
-			fmt.Fprintln(w, "Error!", err)
+			http.Error(w, "Error!", http.StatusInternalServerError)
 			return
 		}
 		fmt.Fprintln(w, string(body))
 	default:
-		fmt.Fprintln(w, "Hanya menerima GET dan POST")
-
+		http.Error(w, "Hanya menerima GET dan POST", http.StatusMethodNotAllowed)
 	}
 
 }
@@ -43,15 +41,13 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Selamat Datang !")
 }
 
-// buat fungsi main
 func main() {
 
 	http.HandleFunc("/", rootHandler)       //register welcomeHandler ke root path "/"
 	http.HandleFunc("/hello", helloHandler) //register helloHandler ke path "/hello" handlerfunc
 	http.HandleFunc("/about", aboutHandler) //register abouthandler ke path "/about" handlerfunc
 
-	//cetak informasi web server berjalan di localhost
-	fmt.Println("Server berjalan di http://localhost:8080")
+	fmt.Println("Server berjalan di http://localhost:8080") //cetak informasi web server berjalan di localhost
 
 	err := http.ListenAndServe(":8080", nil) // Menjalankan server localhost di port 8080
 	if err != nil {                          //lakukan erro handling jika server tidak jalan berikan pesan

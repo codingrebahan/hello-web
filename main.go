@@ -6,21 +6,23 @@ import (
 	"net/http"
 )
 
+type User struct {
+	ID    int
+	Name  string
+	Email string
+}
+
 func helloHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		//deklarasi dan inisialisasi variable name dari query parameter
-		name := r.URL.Query().Get("name")
-
-		// Jika name kosong, gunakan "Guest" sebagai nilai default
-		if name == "" {
+		name := r.URL.Query().Get("name") //deklarasi dan inisialisasi variable name dari query parameter
+		if name == "" {                   // Jika name kosong, gunakan "Guest" sebagai nilai default
 			name = "Guest"
 		}
 		fmt.Fprintln(w, "hello", name)
 	case http.MethodPost:
 		body, err := io.ReadAll(r.Body)
-
 		if err != nil {
 			http.Error(w, "Error!", http.StatusInternalServerError)
 			return
@@ -29,7 +31,6 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.Error(w, "Hanya menerima GET dan POST", http.StatusMethodNotAllowed)
 	}
-
 }
 
 func aboutHandler(w http.ResponseWriter, r *http.Request) {
@@ -38,6 +39,7 @@ func aboutHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
+
 	fmt.Fprintln(w, "Selamat Datang !")
 }
 

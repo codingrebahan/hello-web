@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -10,6 +11,34 @@ type User struct {
 	ID    int
 	Name  string
 	Email string
+}
+
+var users = make(map[int]User)
+var nextID = 1
+
+func usersHandler(w http.ResponseWriter, r *http.Request) {
+
+	decoder := json.NewDecoder(r.Body)
+
+	var user User
+	err := decoder.Decode(&user)
+	if err != nil {
+		http.Error(w, "JSON tidak valid", http.StatusBadRequest)
+		return
+	}
+	if user.Name == "" || user.Email == "" {
+		http.Error(w, "Data nama atau email tidak boleh kosong", http.StatusBadRequest)
+		return
+	}
+	user.ID = nextID
+	users[user.ID] = user
+	nextID++
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(&user)
+
 }
 
 func helloHandler(w http.ResponseWriter, r *http.Request) {
@@ -48,6 +77,7 @@ func main() {
 	http.HandleFunc("/", rootHandler)       //register welcomeHandler ke root path "/"
 	http.HandleFunc("/hello", helloHandler) //register helloHandler ke path "/hello" handlerfunc
 	http.HandleFunc("/about", aboutHandler) //register abouthandler ke path "/about" handlerfunc
+	http.HandleFunc("/users", usersHandler) //register usershandler ke path "/users" handlerfunc
 
 	fmt.Println("Server berjalan di http://localhost:8080") //cetak informasi web server berjalan di localhost
 

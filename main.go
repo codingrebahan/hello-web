@@ -18,27 +18,40 @@ var nextID = 1
 
 func usersHandler(w http.ResponseWriter, r *http.Request) {
 
-	decoder := json.NewDecoder(r.Body)
+	switch r.Method {
+	case http.MethodGet:
 
-	var user User
-	err := decoder.Decode(&user)
-	if err != nil {
-		http.Error(w, "JSON tidak valid", http.StatusBadRequest)
-		return
+		userList := make([]User, 0)
+		for _, user := range users {
+			userList = append(userList, user)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		encoder := json.NewEncoder(w)
+		encoder.Encode(userList)
+	case http.MethodPost:
+
+		decoder := json.NewDecoder(r.Body)
+		var user User
+		err := decoder.Decode(&user)
+		if err != nil {
+			http.Error(w, "JSON tidak valid", http.StatusBadRequest)
+			return
+		}
+		if user.Name == "" || user.Email == "" {
+			http.Error(w, "Data nama atau email tidak boleh kosong", http.StatusBadRequest)
+			return
+		}
+		user.ID = nextID
+		users[user.ID] = user
+		nextID++
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+
+		encoder := json.NewEncoder(w)
+		err = encoder.Encode(&user)
+	default:
+		http.Error(w, "Hanya menerima GET dan POST", http.StatusMethodNotAllowed)
 	}
-	if user.Name == "" || user.Email == "" {
-		http.Error(w, "Data nama atau email tidak boleh kosong", http.StatusBadRequest)
-		return
-	}
-	user.ID = nextID
-	users[user.ID] = user
-	nextID++
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-
-	encoder := json.NewEncoder(w)
-	err = encoder.Encode(&user)
-
 }
 
 func helloHandler(w http.ResponseWriter, r *http.Request) {

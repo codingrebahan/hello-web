@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 )
 
 type User struct {
@@ -20,16 +21,32 @@ func usersHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-
-		userList := make([]User, 0)
-		for _, user := range users {
-			userList = append(userList, user)
+		id := r.PathValue("id")
+		if id == "" {
+			userList := make([]User, 0)
+			for _, user := range users {
+				userList = append(userList, user)
+			}
+			w.Header().Set("Content-Type", "application/json")
+			encoder := json.NewEncoder(w)
+			encoder.Encode(userList)
+			return
+		}
+		userID, err := strconv.Atoi(id)
+		if err != nil {
+			http.Error(w, "Input Id yang sesuai", http.StatusBadRequest)
+			return
+		}
+		user, ok := users[userID]
+		if ok == false {
+			http.Error(w, "Id tidak ditemukan", http.StatusNotFound)
+			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		encoder := json.NewEncoder(w)
-		encoder.Encode(userList)
-	case http.MethodPost:
+		encoder.Encode(user)
 
+	case http.MethodPost:
 		decoder := json.NewDecoder(r.Body)
 		var user User
 		err := decoder.Decode(&user)
@@ -87,10 +104,11 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	http.HandleFunc("/", rootHandler)       //register welcomeHandler ke root path "/"
-	http.HandleFunc("/hello", helloHandler) //register helloHandler ke path "/hello" handlerfunc
-	http.HandleFunc("/about", aboutHandler) //register abouthandler ke path "/about" handlerfunc
-	http.HandleFunc("/users", usersHandler) //register usershandler ke path "/users" handlerfunc
+	http.HandleFunc("/", rootHandler)            //register welcomeHandler ke root path "/"
+	http.HandleFunc("/hello", helloHandler)      //register helloHandler ke path "/hello" handlerfunc
+	http.HandleFunc("/about", aboutHandler)      //register abouthandler ke path "/about" handlerfunc
+	http.HandleFunc("/users", usersHandler)      //register usershandler ke path "/users" handlerfunc
+	http.HandleFunc("/users/{id}", usersHandler) //register userhandler ke path "/users{id}"
 
 	fmt.Println("Server berjalan di http://localhost:8080") //cetak informasi web server berjalan di localhost
 
